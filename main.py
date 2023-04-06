@@ -17,16 +17,29 @@ class Grid(pygame.sprite.Sprite):
         self.pos = pygame.math.Vector2(x, y)
         self.size = pygame.math.Vector2(200, 200)
 
+        self.player = ""
+        self.font = pygame.font.SysFont("Courier", 96)
+        self.player_surf = self.font.render(self.player, True, WHITE)
+
         self.image = pygame.Surface([self.size.x, self.size.y])
         self.image.fill(WHITE)
         self.rect = self.image.get_rect()
         self.rect.topleft = self.pos
+
+    def draw_player(self, surface: pygame.Surface):
+        surface.blit(self.player_surf, (
+            self.pos.x + (self.size.x / 2) - (self.player_surf.get_width() / 2), self.pos.y + (self.size.y / 2) - (self.player_surf.get_height() / 2)
+        ))
 
     def update(self):
         if self.check_hovered():
             self.image.fill(BLUE)
         else:
             self.image.fill(WHITE)
+
+        if self.check_hovered():
+            if self.check_clicked():
+                self.update_player()
 
     def check_hovered(self) -> bool:
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -38,6 +51,19 @@ class Grid(pygame.sprite.Sprite):
                 return False
         else:
             return False
+        
+    def check_clicked(self) -> bool:
+        for event in game.events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                return True
+            else:
+                return False
+        
+    def update_player(self):
+        self.player = game.current_player
+        self.player_surf = self.font.render(self.player, True, BLACK)
+        game.toggle_player()
+
 
 class Board(pygame.sprite.Sprite):
     def __init__(self):
@@ -59,6 +85,8 @@ class Board(pygame.sprite.Sprite):
 
     def draw_groups(self, surface: pygame.Surface):
         self.grid_group.draw(surface)
+        for grid in self.grid_group:
+            grid.draw_player(surface)
 
     def update(self, surface: pygame.Surface):
         self.grid_group.update()
@@ -85,6 +113,10 @@ class Game():
         self.frame_limit = 120
 
         self.current_player = "X"
+        self.font = pygame.font.SysFont("Courier", 24)
+
+        self.current_string = str("Current Player: " + self.current_player)
+        self.current_surf = self.font.render(self.current_string, True, WHITE)
 
         self.board = Board()
 
@@ -108,15 +140,19 @@ class Game():
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
 
-    def toggle_player(self) -> str:
+    def toggle_player(self):
         if self.current_player == "X":
-            return "X"
+            self.current_player = "O"
         elif self.current_player == "O":
-            return "O"
+            self.current_player = "X"
+        
+        self.current_string = str("Current Player: " + self.current_player)
+        self.current_surf = self.font.render(self.current_string, True, WHITE)
 
     def draw(self):
         self.screen.fill(BLACK)
         self.draw_group.draw(self.screen)
+        self.screen.blit(self.current_surf, (700, 50))
 
     def update(self):
         self.draw_group.update(self.screen)
