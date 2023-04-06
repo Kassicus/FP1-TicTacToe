@@ -51,14 +51,14 @@ class Grid(pygame.sprite.Sprite):
                 return False
         else:
             return False
-        
+
     def check_clicked(self) -> bool:
         for event in game.events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 return True
             else:
                 return False
-        
+
     def update_player(self):
         self.player = game.current_player
         self.player_surf = self.font.render(self.player, True, BLACK)
@@ -145,7 +145,7 @@ class Game():
             self.current_player = "O"
         elif self.current_player == "O":
             self.current_player = "X"
-        
+
         self.current_string = str("Current Player: " + self.current_player)
         self.current_surf = self.font.render(self.current_string, True, WHITE)
 
